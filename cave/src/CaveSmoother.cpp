@@ -98,7 +98,7 @@ unsigned char TileGrid45a[GRD_H][GRD_W] = { {X,S,X,X},{S,N,B,X},{X,B,X,X},{X,X,X
 // End cap tile updates
 // - West, North, East, South
 //
-unsigned char TileGridNDw[GRD_H][GRD_W]= { {X,X,B,S},{X,B,N,S},{X,X,B,S},{X,X,X,X} };
+unsigned char TileGridNDw[GRD_H][GRD_W] = { {X,X,B,S},{X,B,N,S},{X,X,B,S},{X,X,X,X} };
 unsigned char TileGridNDn[GRD_H][GRD_W] = { {X,X,X,X},{X,B,X,X},{B,N,B,X},{S,S,S,X} };
 unsigned char TileGridNDe[GRD_H][GRD_W] = { {S,B,X,X},{S,N,B,X},{S,B,X,X},{X,X,X,X} };
 unsigned char TileGridNDs[GRD_H][GRD_W] = { {S,S,S,X},{B,N,B,X},{X,B,X,X},{X,X,X,X} };
@@ -106,6 +106,13 @@ unsigned char TileGridNDs[GRD_H][GRD_W] = { {S,S,S,X},{B,N,B,X},{X,B,X,X},{X,X,X
 // Single isolated tile update
 //
 unsigned char TileGridNGL[GRD_H][GRD_W] = { {X,B,X,X},{B,N,B,X},{X,B,X,X},{X,X,X,X} };
+//
+// A line of 2 walls to put end cap on
+//
+unsigned char TileGrid2Dn[GRD_H][GRD_W] = { {X,B,X,X},{B,N,B,X},{X,S,X,X},{X,X,X,X} };
+unsigned char TileGrid2Ds[GRD_H][GRD_W] = { {X,X,X,X},{X,S,X,X},{B,N,B,X},{X,B,X,X} };
+unsigned char TileGrid2De[GRD_H][GRD_W] = { {X,X,B,X},{X,S,N,B},{X,X,B,X},{X,X,X,X} };
+unsigned char TileGrid2Dw[GRD_H][GRD_W] = { {X,B,X,X},{B,N,S,X},{X,B,X,X},{X,X,X,X} };
 //
 // Added for bit sticking off end. Not sure why TileRounder doesn't need it
 //
@@ -139,6 +146,7 @@ enum TileName {
 	V60a1,V60a2, V60b1,V60b2, V60c1,V60c2, V60d1,V60d2,
 	H30a1,H30a2, H30b1,H30b2, H30c1,H30c2, H30d1,H30d2,
 	SINGLE,
+	END_N, END_S, END_E, END_W,
 	// Specials for in/smoothed grids
 	SOLID,
 	FLOOR,
@@ -172,6 +180,11 @@ const std::map<TileName, Vector2i> tileToInfoMap = {
     { H30a2, Vector2i(3,5) },
     { H30d1, Vector2i(4,5) },
     { H30d2, Vector2i(5,5) },
+
+    { END_N, Vector2i(4,6) },
+    { END_E, Vector2i(5,6) },
+    { END_S, Vector2i(6,6) },
+    { END_W, Vector2i(7,6) },
 
     { SINGLE, Vector2i(4,7) },
     { FLOOR, Vector2i(-1,-1) },
@@ -227,6 +240,11 @@ UpdateInfo updates[] = {
     { TileGridNDs,  0, 0, 0,0, 0,0, FLOOR, IGNORE},
 	// The single isolated tile
     { TileGridNGL,  0, 0, 0,0, 0,0, SINGLE, IGNORE},
+	// 2 vert/horz tiles
+    { TileGrid2Dn,  0, 0, 0,0, 0,0, END_N, IGNORE},
+    { TileGrid2Ds,  0, 0, 0,0, 0,0, END_S, IGNORE},
+    { TileGrid2De,  0, 0, 0,0, 0,0, END_E, IGNORE},
+    { TileGrid2Dw,  0, 0, 0,0, 0,0, END_W, IGNORE},
 #if 0
     // Bit sticking off end
     { TileGrid21n,  0, 0, 0,0, 0,0, FLOOR, IGNORE},
