@@ -131,6 +131,7 @@ void GDCave::make_it(TileMapLayer* pTileMap, int layer, int seed)
 {
 	info.pTileMap = pTileMap;
 	info.mLayer = layer;
+
 	RNG::RandSimple simple(seed);
 	// So don't need to worry about -1,-1 adjust from 0,0 pos when counting neighbors
 	if (info.mCellWidth > info.mBorderWidth || info.mCellHeight > info.mBorderHeight) {
@@ -260,7 +261,7 @@ void GDCave::make_it(TileMapLayer* pTileMap, int layer, int seed)
 	joinRooms(pTileMap, layer, floorMaps);
 
 	Cave::CaveSmoother smoother(info);
-	//smoother.smoothEdges();
+	//XXXXXXXXXXXXXXXX smoother.smoothEdges();
 
 	//
 	// Remove cells just touching on diagonal etc
