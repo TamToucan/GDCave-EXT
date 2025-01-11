@@ -261,12 +261,12 @@ void GDCave::make_it(TileMapLayer* pTileMap, int layer, int seed)
 	joinRooms(pTileMap, layer, floorMaps);
 
 	Cave::CaveSmoother smoother(info);
-	//XXXXXXXXXXXXXXXX smoother.smoothEdges();
+	smoother.smoothEdges();
 
 	//
 	// Remove cells just touching on diagonal etc
-	//
-//	fixup(pTileMap, layer);
+	// NOTE: This F's it up. Not checked why
+	//fixup(pTileMap, layer);
 
 }
 
