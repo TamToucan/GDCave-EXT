@@ -50,15 +50,4 @@ function(BUILD_LIB)
    add_library(${lib} STATIC ${${lib}_SOURCES})
 endfunction(BUILD_LIB)
 
-set(LIBDIRS
-    lib/Util
-    lib/MathStuff
-    lib/PCG
-    lib/Algo)
-    
-include_directories(${LIBDIRS})
-
-foreach(DIR ${LIBDIRS})
-   add_subdirectory(${DIR})
-endforeach()
 

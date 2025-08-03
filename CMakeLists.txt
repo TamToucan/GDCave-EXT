@@ -17,6 +17,12 @@ FetchContent_Declare(
         GIT_TAG godot-4.3-stable
 )
 
-FetchContent_MakeAvailable(GDExtension)
+FetchContent_Declare(
+    Libs
+    GIT_REPOSITORY https://github.com/TamToucan/Libs.git
+    GIT_TAG main
+)
+
+FetchContent_MakeAvailable(GDExtension Libs)
 
 add_subdirectory(cave)
