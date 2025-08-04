@@ -1,5 +1,4 @@
 project(GDCave)
-
 SET(LIB_NAME GDCave)
 
 # Automatically pick up files added to src
