@@ -3,5 +3,5 @@ entry_symbol = "libgdcave_init"
 compatibility_minimum = "4.2"
 
 [libraries]
-windows.debug.x86_64 = "res://addons/gdcave/bin/libGDCave.debug.dll"
-windows.release.x86_64 = "res://addons/gdcave/bin/libGDCave.debug.dll"
+windows.debug.x86_64 = "res://addons/gdcave/bin/GDCave.dll"
+windows.release.x86_64 = "res://addons/gdcave/bin/GDCave.dll"
