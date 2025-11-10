@@ -22,6 +22,7 @@
 #include "SimplexNoise.h"
 #include "noise1234.h"
 #include "Rect.h"
+#include "Debug.h"
 
 using namespace godot;
 
@@ -372,7 +373,7 @@ std::vector<GDCave::BorderWall> GDCave::findMST_Kruskal(std::vector<GDCave::Bord
         // Sort by cost
         return a.thickness  < b.thickness;
     });
-	std::cerr << "=== START MST: " << borderWalls.size() << " " << numRooms << std::endl;
+	LOG_INFO("=== START MST: " << borderWalls.size() << " rooms: " << numRooms);
 
     // Step 2: Process edges in sorted order
     for (const BorderWall& wall : borderWalls) {
@@ -384,16 +385,15 @@ std::vector<GDCave::BorderWall> GDCave::findMST_Kruskal(std::vector<GDCave::Bord
         if (setU != setV) {
             mst.push_back(wall);
             dsu.joinSets(setU, setV);
-            std::cerr << " JOIN " << setU << " " << setV << std::endl;
+			LOG_DEBUG(" JOIN " << setU << " " << setV);
         }
         // Stop if MST contains enough edges
         if (mst.size() == numRooms - 1) break;
     }
-	std::cerr << "DONE MST: " << mst.size() << std::endl;
+	LOG_INFO("DONE MST: " << mst.size());
 	for (auto& node : mst) {
-		std::cerr <<" BORDER: r1=" << node.room1 << " r2=" << node.room2 << " thick="
-				<< node.thickness << " wall=" << node.dir.x << "," << node.dir.y
-				<< std::endl;
+		LOG_DEBUG("BORDER: r1 = " << node.room1 << " r2 = " << node.room2
+			<< " thick = " << node.thickness << " wall=" << node.dir.x << "," << node.dir.y);
 	}
 
     return mst;
@@ -418,7 +418,7 @@ void GDCave::joinRooms(TileMapLayer* pTileMap, int layer, std::pair<Vector2iIntM
 		int wy = node.floor1.y + node.dir.y;
 		for (int i=0; i < node.thickness; ++i) {
 			if (isFloor(wx, wy, pTileMap, layer)) {
-				std::cerr <<  "ERROR: Wall to join room is ALREADY FLOOR: " << wx << "," << wy << std::endl;
+				LOG_ERROR("Wall to join room is ALREADY FLOOR: " << wx << "," << wy);
 			}
 			Vector2i coords = getMapPos(wx, wy);
 			setCell(pTileMap, layer, coords, info.mFloor);

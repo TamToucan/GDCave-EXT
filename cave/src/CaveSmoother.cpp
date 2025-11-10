@@ -10,6 +10,8 @@
 #include <vector>
 #include <godot_cpp/classes/tile_map_layer.hpp>
 
+#include "Debug.h"
+
 namespace Cave {
 
 //
@@ -264,7 +266,7 @@ UpdateInfo updates[] = {
 //
 void createUpdateInfos()
 {
-	std::cerr << "====================== SMOOTH CREATE UPDATES" << std::endl;
+    LOG_INFO("====================== SMOOTH CREATE UPDATES");
 	for (auto& u : updates) {
         const unsigned char (*grid)[GRD_W] = u.pattern;
         int l_mask = 0;
@@ -292,7 +294,7 @@ void createUpdateInfos()
         }
         if (l_xOff1 == -1)
         {
-            std::cerr << "ABORT: No tile position. " << u.t1 << "," << u.t2 << std::endl;
+            LOG_ABORT("No tile position. " << u.t1 << "," << u.t2);
         }
         u.mask = l_mask;
         u.value = l_value;
@@ -301,10 +303,9 @@ void createUpdateInfos()
         // Make P2 = P1 so don't need to check if 1 or 2 tiles being updated
         u.xoff2 = (l_xOff2 == -1) ? l_xOff1 : l_xOff2;
         u.yoff2 = (l_yOff2 == -1) ? l_yOff1 : l_yOff2;
-        std::cerr << "UPDATE: msk:" << std::hex << u.mask << " val:" << u.value << std::dec
-        		<< " of1: " << u.xoff1 << "," << u.yoff1
-        		<< " of2: " << u.xoff2 << "," << u.yoff2
-				<< std::endl;
+        LOG_DEBUG("UPDATE: msk:" << std::hex << u.mask << " val:" << u.value << std::dec
+            << " of1: " << u.xoff1 << "," << u.yoff1
+            << " of2: " << u.xoff2 << "," << u.yoff2);
     }
 }
 
@@ -359,7 +360,7 @@ void CaveSmoother::smoothEdges()
 	// we shift the maze 0,0 to 1,1. We also make it wider to allow the
 	// right and bottom edges to be a border
 	//
-	std::cerr << "====================== SMOOTH EDGES" << std::endl;
+    LOG_INFO("====================== SMOOTH EDGES");
 	std::vector<std::vector<int>> smoothedGrid(info.mCaveHeight+GRD_H+1, std::vector<int>(info.mCaveWidth+GRD_W+1, IGNORE));
 	std::vector<std::vector<int>> inGrid(info.mCaveHeight+GRD_H+1, std::vector<int>(info.mCaveWidth+GRD_W+1, SOLID));
 
@@ -379,7 +380,7 @@ void CaveSmoother::smoothEdges()
     	for (int x = 0; x < info.mCaveWidth-1; x++) {
 
     		// Get the value of the 4x4 grid
-    		std::cerr << "==MASK value " << x << "," << y << std::endl;
+            LOG_DEBUG("==MASK value " << x << "," << y);
     		int value=0;
     		int shift=(GRD_H*GRD_W)-1;
     		for (int r=0; r < GRD_H; ++r)
@@ -392,56 +393,54 @@ void CaveSmoother::smoothEdges()
     				--shift;
     			}
     		}
-    		std::cerr << "==FIND " << x << "," << y << " val:" << std::hex << value << std::dec << std::endl;
+            LOG_DEBUG("==FIND " << x << "," << y << " val:" << std::hex << value << std::dec);
 
     		// Find the matching update(s) for that value
     		//
     		int idx = 0;
             for (const auto& up : updates) {
-            	std::cerr << "  NEXT up:" << idx << " msk:" << std::hex << up.mask << " val:" << up.value
-            			<< " inVal:" << value << " and:" << (value&up.mask) << std::dec << std::endl;
+                LOG_DEBUG("  NEXT up:" << idx << " msk:" << std::hex << up.mask << " val:" << up.value
+                    << " inVal:" << value << " and:" << (value & up.mask) << std::dec);
                 if ( (value&up.mask) == up.value) {
                 	Vector2i pos1(x+ up.xoff1, y+ up.yoff1);
                 	Vector2i pos2(x+ up.xoff2, y+ up.yoff2);
-                	std::cerr << "      FOUND1 up:" << idx
-                			<< " p1:"<< pos1.x << "," << pos1.y
-                			<< " p2:"<< pos2.x << "," << pos2.y << std::endl;
+                    LOG_DEBUG("      FOUND1 up:" << idx
+                        << " p1:" << pos1.x << "," << pos1.y
+                        << " p2:" << pos2.x << "," << pos2.y);
                 	// Ensure not smoothed it already
                 	// - can check both pos since p2 == p1 if no 2nd tile
                 	if ((smoothedGrid[pos1.y][pos1.x] == IGNORE)
                 	 && (smoothedGrid[pos2.y][pos2.x] == IGNORE)) {
                 		auto t1 = tileToInfoMap.at(up.t1);
-                		std::cerr << "         SMOOTH1 -> " << up.t1 << " (" << t1.x << "," << t1.y << ")" <<std::endl;
+                        LOG_DEBUG("         SMOOTH1 -> " << up.t1 << " (" << t1.x << "," << t1.y << ")");
                 		// Smooth the first (N) tile
                 		// - Need to translate the grid pos back to cave pos
                 		setCell(pos1.x-1,pos1.y-1, tileToInfoMap.at(up.t1) );
                 		smoothedGrid[pos1.y][pos1.x] = SMOOTHED;
                 		// Check if there is a second (M) tile
                 		if (up.t2 != IGNORE) {
-                			std::cerr << "      FOUND2 " << pos2.x << "," << pos2.y << std::endl;
+                            LOG_DEBUG("      FOUND2 " << pos2.x << "," << pos2.y);
                 			auto t2 = tileToInfoMap.at(up.t2);
-                			std::cerr << "         SMOOTH2 -> " << up.t2 << " (" << t2.x << "," << t2.y << ")" <<std::endl;
+                            LOG_DEBUG("         SMOOTH2 -> " << up.t2 << " (" << t2.x << "," << t2.y << ")");
                 			// Smooth the second (M) tile
                 			// - Need to translate the grid pos back to cave pos
                 			setCell(pos2.x-1,pos2.y-1, tileToInfoMap.at(up.t2) );
                 			smoothedGrid[pos2.y][pos2.x] = SMOOTHED;
                 		}
                 		else {
-                			std::cerr << "  IGNORE TILE2: " << pos2.x << "," << pos2.y << std::endl;
+                            LOG_DEBUG("  IGNORE TILE2: " << pos2.x << "," << pos2.y);
                 		}
                 	}
                 	else {
-                		std::cerr << "  IGNORE p1:"
-                				<< smoothedGrid[pos1.y][pos1.x]
-								<< " p2:" << smoothedGrid[pos2.y][pos2.x]
-                				<< std::endl;
+                        LOG_DEBUG("  IGNORE p1:" << smoothedGrid[pos1.y][pos1.x]
+                            << " p2:" << smoothedGrid[pos2.y][pos2.x]);
                 	}
                 }
                 ++idx;
             }
     	}
     }
-    std::cerr << "=========== DONE" <<std::endl;
+    LOG_INFO("=========== DONE");
 }
 
 ///////////////////////////////////////////////////

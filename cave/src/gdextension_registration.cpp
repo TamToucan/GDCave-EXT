@@ -5,15 +5,16 @@
 #include <godot_cpp/godot.hpp>
 
 #include <GDCave.hpp>
+#include "Debug.h"
 
 using namespace godot;
 
 void initialize_libgdcave(ModuleInitializationLevel p_level) {
-	std::cout << "################# REGISTER OUT" << std::endl;
-	std::cerr << "################# REGISTER ERR" << std::endl;
-	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+	if (p_level != MODULE_INITIALIZATION_LEVEL_CORE) {
 		return;
 	}
+	SET_DEBUG("ALL");
+	LOG_INFO("################# REGISTER GDCave");
 	ClassDB::register_class<GDCave>();
 }
 
