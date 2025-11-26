@@ -8,7 +8,9 @@
 #include "CaveSmoother.h"
 #include <iostream>
 #include <vector>
-#include <godot_cpp/classes/tile_map_layer.hpp>
+#include <map>
+#include "CaveInfo.h"
+#include "TileTypes.h"
 
 #include "Debug.h"
 
@@ -143,57 +145,6 @@ unsigned char TileGrid28n[GRD_H][GRD_W] = { {X,X,X,X},{X,B,X,X},{B,N,B,X},{S,S,B
 //  1111 1111
 // d1   d2
 //
-enum TileName {
-	T45a,  T45b, T45c, T45d,
-	V60a1,V60a2, V60b1,V60b2, V60c1,V60c2, V60d1,V60d2,
-	H30a1,H30a2, H30b1,H30b2, H30c1,H30c2, H30d1,H30d2,
-	SINGLE,
-	END_N, END_S, END_E, END_W,
-	// Specials for in/smoothed grids
-	SOLID,
-	FLOOR,
-	SMOOTHED,
-	IGNORE
-};
-
-//
-// Turn a TileName into the godot Atlas (at given on a 8x8 tileset)
-//
-const std::map<TileName, Vector2i> tileToInfoMap = {
-    { T45c, Vector2i(0,6) },
-    { T45b, Vector2i(3,6) },
-    { T45a, Vector2i(2,6) },
-    { T45d, Vector2i(1,6) },
-
-    { V60c1, Vector2i(3,4) },
-    { V60c2, Vector2i(3,3) },
-    { V60b1, Vector2i(1,3) },
-    { V60b2, Vector2i(1,4) },
-    { V60a1, Vector2i(2,3) },
-    { V60a2, Vector2i(2,4) },
-    { V60d1, Vector2i(0,4) },
-    { V60d2, Vector2i(0,3) },
-
-    { H30c1, Vector2i(1,5) },
-    { H30c2, Vector2i(0,5) },
-    { H30b1, Vector2i(7,5) },
-    { H30b2, Vector2i(6,5) },
-    { H30a1, Vector2i(2,5) },
-    { H30a2, Vector2i(3,5) },
-    { H30d1, Vector2i(4,5) },
-    { H30d2, Vector2i(5,5) },
-
-    { END_N, Vector2i(4,6) },
-    { END_E, Vector2i(5,6) },
-    { END_S, Vector2i(6,6) },
-    { END_W, Vector2i(7,6) },
-
-    { SINGLE, Vector2i(4,7) },
-    { FLOOR, Vector2i(-1,-1) },
-
-    { SMOOTHED, Vector2i(-1,-1) },
-    { IGNORE, Vector2i(-1,-1) }
-};
 
 ////////////////////////////////////////////////////////////////
 
@@ -311,8 +262,6 @@ void createUpdateInfos()
 
 }
 
-using namespace godot;
-
 // Check if a coordinate is within the grid bounds
 bool CaveSmoother::isInBounds(int x, int y) {
     return (y >= 0 && y < info.mCaveHeight) && (x >= 0 && x < info.mCaveWidth);
@@ -320,8 +269,7 @@ bool CaveSmoother::isInBounds(int x, int y) {
 
 bool CaveSmoother::isWall(int cx, int cy) {
 	if (isInBounds(cx, cy)) {
-		Vector2i coords = getMapPos(cx,cy);
-		return (info.pTileMap->get_cell_atlas_coords(coords) == info.mWall);
+		return ((*info.pTileMap)[cy][cx] == info.mWall);
 	}
 	return false;
 }
@@ -334,12 +282,12 @@ bool CaveSmoother::isSolid(int cx, int cy, std::vector< std::vector<int> > grid)
 }
 
 Vector2i CaveSmoother::getMapPos(int x, int y) {
-	return Vector2i(info.mBorderWidth+x*info.mCellWidth, info.mBorderHeight+y*info.mCellHeight);
+	return Vector2i{info.mBorderWidth+x*info.mCellWidth, info.mBorderHeight+y*info.mCellHeight};
 }
 
 //////////////////////////////////////////////////
 
-CaveSmoother::CaveSmoother(const GDCave::Info& i) :
+CaveSmoother::CaveSmoother(const Cave::CaveInfo& i) :
 	info(i)
 {
 	createUpdateInfos();
@@ -399,48 +347,30 @@ void CaveSmoother::smoothEdges()
     		//
     		int idx = 0;
             for (const auto& up : updates) {
-                LOG_DEBUG("  NEXT up:" << idx << " msk:" << std::hex << up.mask << " val:" << up.value
-                    << " inVal:" << value << " and:" << (value & up.mask) << std::dec);
                 if ( (value&up.mask) == up.value) {
-                	Vector2i pos1(x+ up.xoff1, y+ up.yoff1);
-                	Vector2i pos2(x+ up.xoff2, y+ up.yoff2);
-                    LOG_DEBUG("      FOUND1 up:" << idx
-                        << " p1:" << pos1.x << "," << pos1.y
-                        << " p2:" << pos2.x << "," << pos2.y);
+			Vector2i pos1{x+ up.xoff1, y+ up.yoff1};
+			Vector2i pos2{x+ up.xoff2, y+ up.yoff2};
                 	// Ensure not smoothed it already
                 	// - can check both pos since p2 == p1 if no 2nd tile
                 	if ((smoothedGrid[pos1.y][pos1.x] == IGNORE)
                 	 && (smoothedGrid[pos2.y][pos2.x] == IGNORE)) {
-                		auto t1 = tileToInfoMap.at(up.t1);
-                        LOG_DEBUG("         SMOOTH1 -> " << up.t1 << " (" << t1.x << "," << t1.y << ")");
                 		// Smooth the first (N) tile
                 		// - Need to translate the grid pos back to cave pos
-                		setCell(pos1.x-1,pos1.y-1, tileToInfoMap.at(up.t1) );
+				setCell(pos1.x-1,pos1.y-1, Vector2i{up.t1, 0});
                 		smoothedGrid[pos1.y][pos1.x] = SMOOTHED;
                 		// Check if there is a second (M) tile
                 		if (up.t2 != IGNORE) {
-                            LOG_DEBUG("      FOUND2 " << pos2.x << "," << pos2.y);
-                			auto t2 = tileToInfoMap.at(up.t2);
-                            LOG_DEBUG("         SMOOTH2 -> " << up.t2 << " (" << t2.x << "," << t2.y << ")");
                 			// Smooth the second (M) tile
                 			// - Need to translate the grid pos back to cave pos
-                			setCell(pos2.x-1,pos2.y-1, tileToInfoMap.at(up.t2) );
+					setCell(pos2.x-1,pos2.y-1, Vector2i{up.t2, 0});
                 			smoothedGrid[pos2.y][pos2.x] = SMOOTHED;
                 		}
-                		else {
-                            LOG_DEBUG("  IGNORE TILE2: " << pos2.x << "," << pos2.y);
-                		}
-                	}
-                	else {
-                        LOG_DEBUG("  IGNORE p1:" << smoothedGrid[pos1.y][pos1.x]
-                            << " p2:" << smoothedGrid[pos2.y][pos2.x]);
                 	}
                 }
                 ++idx;
             }
     	}
     }
-    LOG_INFO("=========== DONE");
 }
 
 ///////////////////////////////////////////////////
@@ -450,15 +380,8 @@ void CaveSmoother::smoothEdges()
 // e.g. the 64x64 45 degree tile is drawn as 64 8x8 tiles
 //
 void CaveSmoother::setCell(int cx, int cy, Vector2i tile) {
-	Vector2 a = (tile == info.mFloor) ? tile : Vector2i(tile.x*info.mCellWidth, tile.y*info.mCellHeight);
-	Vector2i corner = getMapPos(cx,cy);
-	for (int y=0; y < info.mCellHeight; ++y) {
-		for (int x=0; x < info.mCellWidth; ++x) {
-			Vector2i pos(corner.x + x, corner.y + y);
-			// For some reason Need to use -1,-1 for floor
-			Vector2 t = (tile == info.mFloor) ? tile : Vector2i(a.x+x, a.y+y);
-			info.pTileMap->set_cell(pos, info.mLayer, t);
-		}
+	if (isInBounds(cx, cy)) {
+		(*info.pTileMap)[cy][cx] = tile.x;
 	}
 }
 

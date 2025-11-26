@@ -3,15 +3,13 @@
 
 #include <vector>
 
-#include "GDCave.hpp"
-
-using namespace godot;
+#include "CaveInfo.h"
 
 namespace Cave {
 
 class CaveSmoother {
 public:
-	CaveSmoother(const GDCave::Info& i);
+	CaveSmoother(const CaveInfo& i);
 	~CaveSmoother();
 
 	void smoothEdges();
@@ -24,7 +22,7 @@ private:
 	void setCell(int cx, int cy, Vector2i tile);
 
 private:
-	const GDCave::Info& info;
+	const CaveInfo& info;
 };
 
 } // namespace
