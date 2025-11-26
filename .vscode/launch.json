@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "${workspaceRoot}/build/cave/cave_test.exe",
             "args": [],
-            "cwd": "${workspaceRoot}"
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "Build Cave Test (Debug)"
         }
     ]
 }
