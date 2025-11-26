@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <cstddef>
 #include "CaveInfo.h"
 #include "GenerationParams.h"
 
