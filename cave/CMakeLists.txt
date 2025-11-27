@@ -49,3 +49,7 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy
         $<TARGET_FILE:${GDCAVE_LIB_NAME}>
         "D:/git/the-lott/addons/gdcave/bin")
+
+# Test executable for the core cave library
+add_executable(cave_test test/main.cpp)
+target_link_libraries(cave_test PRIVATE ${CAVE_LIB_NAME})

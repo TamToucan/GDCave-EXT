@@ -269,8 +269,7 @@ bool CaveSmoother::isInBounds(int x, int y) {
 
 bool CaveSmoother::isWall(int cx, int cy) {
 	if (isInBounds(cx, cy)) {
-		Vector2i coords = getMapPos(cx,cy);
-		return ((*info.pTileMap)[coords.y][coords.x] == info.mWall);
+		return ((*info.pTileMap)[cy][cx] == info.mWall);
 	}
 	return false;
 }
@@ -381,12 +380,8 @@ void CaveSmoother::smoothEdges()
 // e.g. the 64x64 45 degree tile is drawn as 64 8x8 tiles
 //
 void CaveSmoother::setCell(int cx, int cy, Vector2i tile) {
-	Vector2i corner = getMapPos(cx,cy);
-	for (int y=0; y < info.mCellHeight; ++y) {
-		for (int x=0; x < info.mCellWidth; ++x) {
-			Vector2i pos{corner.x + x, corner.y + y};
-			(*info.pTileMap)[pos.y][pos.x] = tile.x;
-		}
+	if (isInBounds(cx, cy)) {
+		(*info.pTileMap)[cy][cx] = tile.x;
 	}
 }
 
