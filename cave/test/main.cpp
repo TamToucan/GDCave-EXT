@@ -2,10 +2,10 @@
 #include <vector>
 #include "core/Cave.h"
 #include "core/CaveInfo.h"
+#include "core/TileTypes.h"
 #include "core/GenerationParams.h"
 
 int main() {
-    Cave::Cave cave;
     Cave::CaveInfo info;
     Cave::GenerationParams params;
 
@@ -35,18 +35,15 @@ int main() {
     info.mBorderHeight = 1;
     info.mCellWidth = 8;
     info.mCellHeight = 8;
-    info.mFloor = ' ';
-    info.mWall = '#';
-    std::vector<std::vector<int>> tileMap(info.mCaveHeight, std::vector<int>(info.mCaveWidth));
-    info.pTileMap = &tileMap;
 
+    Cave::Cave cave(info, params);
     // Generate the cave
-    cave.generate(info, params);
+    Cave::TileMap tileMap = cave.generate();
 
     // Print the tile map to the console
-    for (int y = 0; y < info.mCaveHeight; ++y) {
-        for (int x = 0; x < info.mCaveWidth; ++x) {
-            std::cout << (char)tileMap[y][x];
+    for (int y = 0; y < tileMap.size(); ++y) {
+        for (int x = 0; x < tileMap[0].size(); ++x) {
+            std::cout << ((tileMap[y][x] == Cave::FLOOR) ? ' ': '#');
         }
         std::cout << std::endl;
     }
