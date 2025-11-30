@@ -4,9 +4,10 @@
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/tile_map_layer.hpp>
 #include <vector>
+#include "core/Cave.h"
 #include "core/CaveInfo.h"
-#include "core/GenerationParams.h"
 #include "core/TileTypes.h"
+#include "core/GenerationParams.h"
 
 namespace godot {
 
@@ -16,6 +17,7 @@ class GDCave : public Object {
 protected:
 	static void _bind_methods();
 
+	Cave::Cave m_cave;
 	Cave::CaveInfo m_cave_info;
     Cave::GenerationParams m_gen_params;
 	std::vector<std::vector<int>> m_tile_map;
@@ -44,9 +46,9 @@ public:
 	void make_cave(TileMapLayer* pTileMap, int layer, int seed);
 
 private:
-    void copy_core_to_tilemap(TileMapLayer* pTileMap, int layer, const Cave::TileMap& caveMap);
+    void copy_core_to_tilemap(TileMapLayer* pTileMap, int layer);
     Vector2i map_tilename_to_vector2i(Cave::TileName tile_name);
-    void setCell(TileMapLayer* pTileMap, int layer, int x, int y, Vector2i tile);
+    void setCell(TileMapLayer* pTileMap, int layer, Vector2i coords, Vector2i tile);
 };
 
 }

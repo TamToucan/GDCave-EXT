@@ -29,6 +29,9 @@ struct CaveInfo {
     int mCellHeight = 1;
     int mStartCellX = 0;
     int mStartCellY = 0;
+    int mFloor = 0;
+    int mWall = 1;
+    std::vector<std::vector<int>>* pTileMap = nullptr;
     int mLayer = 0;
 };
 

@@ -7,7 +7,6 @@
 #include <cstddef>
 #include "CaveInfo.h"
 #include "GenerationParams.h"
-#include "TileTypes.h"
 
 namespace Cave {
 
@@ -27,21 +26,19 @@ namespace Cave {
 	using IntVectorOfVector2iMap = std::unordered_map<int, std::vector<Vector2i>> ;
 
 class Cave {
-    CaveInfo mInfo;
-    GenerationParams mParams;
 public:
-    Cave(CaveInfo& info, const GenerationParams& params);
+    Cave();
     ~Cave();
 
-    TileMap generate();
+    void generate(CaveInfo& info, const GenerationParams& params);
 
 private:
-    void initialise(TileMap& tileMap);
-    void runCellularAutomata(TileMap& tileMap);
-	void fixUp(TileMap& tileMap);
-    std::pair< Vector2iIntMap, IntVectorOfVector2iMap > findRooms(TileMap& tileMap);
-    void joinRooms(TileMap& tileMap, std::pair<Vector2iIntMap, IntVectorOfVector2iMap> floorMaps);
-    void smooth(TileMap& tileMap);
+    void initialise(CaveInfo& info, const GenerationParams& params);
+    void runCellularAutomata(CaveInfo& info, const GenerationParams& params);
+	void fixUp(CaveInfo& info);
+    std::pair< Vector2iIntMap, IntVectorOfVector2iMap > findRooms(CaveInfo& info);
+    void joinRooms(CaveInfo& info, std::pair<Vector2iIntMap, IntVectorOfVector2iMap> floorMaps);
+    void smooth(CaveInfo& info);
 
 	struct BorderWall {
 		Vector2i floor1;
@@ -51,15 +48,13 @@ private:
 		int room2;
 		int thickness;
 	};
-	std::vector<BorderWall> detectBorderWalls(TileMap& tileMap, std::pair<Vector2iIntMap, IntVectorOfVector2iMap> floorMaps);
+	std::vector<BorderWall> detectBorderWalls(CaveInfo& info, std::pair<Vector2iIntMap, IntVectorOfVector2iMap> floorMaps);
 	std::vector<BorderWall> findMST_Kruskal(std::vector<Cave::BorderWall>& borderWalls, std::vector<int> roomIds);
 
-public:
-	static bool isTile(const TileMap& tileMap, int cx, int cy, int tile);
-	static bool isWall(const TileMap& tileMap, int cx, int cy)  { return isTile(tileMap, cx, cy, WALL); }
-	static bool isFloor(const TileMap& tileMap, int cx, int cy) { return isTile(tileMap, cx, cy, FLOOR); }
-	static void setCell(TileMap& tileMap, int x, int y, int tile);
-	static Vector2i getMapPos(int x, int y);
+	bool isWall(int cx, int cy, CaveInfo& info);
+	bool isFloor(int cx, int cy, CaveInfo& info);
+	void setCell(CaveInfo& info, Vector2i coords, int tile);
+	Vector2i getMapPos(CaveInfo& info, int x, int y);
 };
 
 } // namespace Cave

@@ -52,5 +52,4 @@ add_custom_command(
 
 # Test executable for the core cave library
 add_executable(cave_test test/main.cpp)
-target_include_directories(cave_test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_link_libraries(cave_test PRIVATE ${CAVE_LIB_NAME})

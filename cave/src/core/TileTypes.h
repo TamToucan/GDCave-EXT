@@ -1,9 +1,7 @@
 #ifndef TILE_TYPES_H
 #define TILE_TYPES_H
-#include <vector>
 
 namespace Cave {
-	using TileMap = std::vector<std::vector<int>>;
 
 // TileName is used to identify the type of tile to be placed in the map.
 // This is used by the core library and the Godot wrapper will map these
