@@ -1,14 +1,10 @@
 #include <algorithm>
 #include <cmath>
-#include <functional>
 #include <set>
-#include <sstream>
 
 #include "Cave.h"
 #include "CaveSmoother.h"
-#include "DJSets.h"
 #include "DisjointSets.h"
-#include "MathStuff.h"
 #include "PerlinNoise.h"
 #include "RandSimple.h"
 #include "RogueCave.hpp"

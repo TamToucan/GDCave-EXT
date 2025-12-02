@@ -6,12 +6,12 @@
  */
 
 #include "CaveSmoother.h"
+#include "Cave.h"
+#include "CaveInfo.h"
+#include "TileTypes.h"
 #include <iostream>
 #include <vector>
-#include <map>
-#include "CaveInfo.h"
-#include "Cave.h"
-#include "TileTypes.h"
+
 
 #include "Debug.h"
 
@@ -83,53 +83,82 @@ const unsigned char M = 'm';
 //
 // Two tile updates (30 and 60 slopes)
 //
-unsigned char TileGrid60b[GRD_H][GRD_W] = { {X,S,X,X},{B,N,S,X},{B,M,S,X},{X,B,S,X} };
-unsigned char TileGrid60d[GRD_H][GRD_W] = { {S,B,X,X},{S,M,B,X},{S,N,B,X},{X,S,X,X} };
-unsigned char TileGrid60c[GRD_H][GRD_W] = { {X,X,B,S},{X,B,M,S},{X,B,N,S},{X,X,S,X} };
-unsigned char TileGrid60a[GRD_H][GRD_W] = { {X,S,X,X},{S,N,B,X},{S,M,B,X},{S,B,X,X} };
+unsigned char TileGrid60b[GRD_H][GRD_W] = {
+    {X, S, X, X}, {B, N, S, X}, {B, M, S, X}, {X, B, S, X}};
+unsigned char TileGrid60d[GRD_H][GRD_W] = {
+    {S, B, X, X}, {S, M, B, X}, {S, N, B, X}, {X, S, X, X}};
+unsigned char TileGrid60c[GRD_H][GRD_W] = {
+    {X, X, B, S}, {X, B, M, S}, {X, B, N, S}, {X, X, S, X}};
+unsigned char TileGrid60a[GRD_H][GRD_W] = {
+    {X, S, X, X}, {S, N, B, X}, {S, M, B, X}, {S, B, X, X}};
 
-unsigned char TileGrid30a[GRD_H][GRD_W] = { {X,S,S,S},{S,N,M,B},{X,B,B,X},{X,X,X,X} };
-unsigned char TileGrid30d[GRD_H][GRD_W] = { {X,X,X,X},{X,B,B,X},{S,N,M,B},{X,S,S,S} };
-unsigned char TileGrid30c[GRD_H][GRD_W] = { {X,X,X,X},{X,B,B,X},{B,M,N,S},{S,S,S,X} };
-unsigned char TileGrid30b[GRD_H][GRD_W] = { {X,X,X,X},{S,S,S,X},{B,M,N,S},{X,B,B,X} };
+unsigned char TileGrid30a[GRD_H][GRD_W] = {
+    {X, S, S, S}, {S, N, M, B}, {X, B, B, X}, {X, X, X, X}};
+unsigned char TileGrid30d[GRD_H][GRD_W] = {
+    {X, X, X, X}, {X, B, B, X}, {S, N, M, B}, {X, S, S, S}};
+unsigned char TileGrid30c[GRD_H][GRD_W] = {
+    {X, X, X, X}, {X, B, B, X}, {B, M, N, S}, {S, S, S, X}};
+unsigned char TileGrid30b[GRD_H][GRD_W] = {
+    {X, X, X, X}, {S, S, S, X}, {B, M, N, S}, {X, B, B, X}};
 //
 // Single 45 degree tile updates
 //
-unsigned char TileGrid45b[GRD_H][GRD_W] = { {X,X,S,X},{X,B,N,S},{X,X,B,X},{X,X,X,X} };
-unsigned char TileGrid45c[GRD_H][GRD_W] = { {X,X,B,X},{X,B,N,S},{X,X,S,X},{X,X,X,X} };
-unsigned char TileGrid45d[GRD_H][GRD_W] = { {X,B,X,X},{S,N,B,X},{X,S,X,X},{X,X,X,X} };
-unsigned char TileGrid45a[GRD_H][GRD_W] = { {X,S,X,X},{S,N,B,X},{X,B,X,X},{X,X,X,X} };
+unsigned char TileGrid45b[GRD_H][GRD_W] = {
+    {X, X, S, X}, {X, B, N, S}, {X, X, B, X}, {X, X, X, X}};
+unsigned char TileGrid45c[GRD_H][GRD_W] = {
+    {X, X, B, X}, {X, B, N, S}, {X, X, S, X}, {X, X, X, X}};
+unsigned char TileGrid45d[GRD_H][GRD_W] = {
+    {X, B, X, X}, {S, N, B, X}, {X, S, X, X}, {X, X, X, X}};
+unsigned char TileGrid45a[GRD_H][GRD_W] = {
+    {X, S, X, X}, {S, N, B, X}, {X, B, X, X}, {X, X, X, X}};
 //
 // End cap tile updates
 // - West, North, East, South
 //
-unsigned char TileGridNDw[GRD_H][GRD_W] = { {X,X,B,S},{X,B,N,S},{X,X,B,S},{X,X,X,X} };
-unsigned char TileGridNDn[GRD_H][GRD_W] = { {X,X,X,X},{X,B,X,X},{B,N,B,X},{S,S,S,X} };
-unsigned char TileGridNDe[GRD_H][GRD_W] = { {S,B,X,X},{S,N,B,X},{S,B,X,X},{X,X,X,X} };
-unsigned char TileGridNDs[GRD_H][GRD_W] = { {S,S,S,X},{B,N,B,X},{X,B,X,X},{X,X,X,X} };
+unsigned char TileGridNDw[GRD_H][GRD_W] = {
+    {X, X, B, S}, {X, B, N, S}, {X, X, B, S}, {X, X, X, X}};
+unsigned char TileGridNDn[GRD_H][GRD_W] = {
+    {X, X, X, X}, {X, B, X, X}, {B, N, B, X}, {S, S, S, X}};
+unsigned char TileGridNDe[GRD_H][GRD_W] = {
+    {S, B, X, X}, {S, N, B, X}, {S, B, X, X}, {X, X, X, X}};
+unsigned char TileGridNDs[GRD_H][GRD_W] = {
+    {S, S, S, X}, {B, N, B, X}, {X, B, X, X}, {X, X, X, X}};
 //
 // Single isolated tile update
 //
-unsigned char TileGridNGL[GRD_H][GRD_W] = { {X,B,X,X},{B,N,B,X},{X,B,X,X},{X,X,X,X} };
+unsigned char TileGridNGL[GRD_H][GRD_W] = {
+    {X, B, X, X}, {B, N, B, X}, {X, B, X, X}, {X, X, X, X}};
 //
 // A line of 2 walls to put end cap on
 //
-unsigned char TileGrid2Dn[GRD_H][GRD_W] = { {X,B,X,X},{B,N,B,X},{X,S,X,X},{X,X,X,X} };
-unsigned char TileGrid2Ds[GRD_H][GRD_W] = { {X,X,X,X},{X,S,X,X},{B,N,B,X},{X,B,X,X} };
-unsigned char TileGrid2De[GRD_H][GRD_W] = { {X,X,B,X},{X,S,N,B},{X,X,B,X},{X,X,X,X} };
-unsigned char TileGrid2Dw[GRD_H][GRD_W] = { {X,B,X,X},{B,N,S,X},{X,B,X,X},{X,X,X,X} };
+unsigned char TileGrid2Dn[GRD_H][GRD_W] = {
+    {X, B, X, X}, {B, N, B, X}, {X, S, X, X}, {X, X, X, X}};
+unsigned char TileGrid2Ds[GRD_H][GRD_W] = {
+    {X, X, X, X}, {X, S, X, X}, {B, N, B, X}, {X, B, X, X}};
+unsigned char TileGrid2De[GRD_H][GRD_W] = {
+    {X, X, B, X}, {X, S, N, B}, {X, X, B, X}, {X, X, X, X}};
+unsigned char TileGrid2Dw[GRD_H][GRD_W] = {
+    {X, B, X, X}, {B, N, S, X}, {X, B, X, X}, {X, X, X, X}};
 //
 // Added for bit sticking off end. Not sure why TileRounder doesn't need it
 //
-unsigned char TileGrid21n[GRD_H][GRD_W] = { {X,X,X,X},{B,B,X,X},{S,N,B,X},{S,B,X,X} };
-unsigned char TileGrid22n[GRD_H][GRD_W] = { {X,X,X,X},{S,S,B,X},{B,N,B,X},{X,B,X,X} };
-unsigned char TileGrid23n[GRD_H][GRD_W] = { {X,X,X,X},{X,B,S,X},{B,N,S,X},{X,B,B,X} };
-unsigned char TileGrid24n[GRD_H][GRD_W] = { {X,X,X,X},{X,B,X,X},{B,N,B,X},{B,S,S,X} };
+unsigned char TileGrid21n[GRD_H][GRD_W] = {
+    {X, X, X, X}, {B, B, X, X}, {S, N, B, X}, {S, B, X, X}};
+unsigned char TileGrid22n[GRD_H][GRD_W] = {
+    {X, X, X, X}, {S, S, B, X}, {B, N, B, X}, {X, B, X, X}};
+unsigned char TileGrid23n[GRD_H][GRD_W] = {
+    {X, X, X, X}, {X, B, S, X}, {B, N, S, X}, {X, B, B, X}};
+unsigned char TileGrid24n[GRD_H][GRD_W] = {
+    {X, X, X, X}, {X, B, X, X}, {B, N, B, X}, {B, S, S, X}};
 
-unsigned char TileGrid25n[GRD_H][GRD_W] = { {X,X,X,X},{S,B,X,X},{S,N,B,X},{B,B,X,X} };
-unsigned char TileGrid26n[GRD_H][GRD_W] = { {X,X,X,X},{B,S,S,X},{B,N,B,X},{X,B,X,X} };
-unsigned char TileGrid27n[GRD_H][GRD_W] = { {X,X,X,X},{X,B,B,X},{B,N,S,X},{X,B,S,X} };
-unsigned char TileGrid28n[GRD_H][GRD_W] = { {X,X,X,X},{X,B,X,X},{B,N,B,X},{S,S,B,X} };
+unsigned char TileGrid25n[GRD_H][GRD_W] = {
+    {X, X, X, X}, {S, B, X, X}, {S, N, B, X}, {B, B, X, X}};
+unsigned char TileGrid26n[GRD_H][GRD_W] = {
+    {X, X, X, X}, {B, S, S, X}, {B, N, B, X}, {X, B, X, X}};
+unsigned char TileGrid27n[GRD_H][GRD_W] = {
+    {X, X, X, X}, {X, B, B, X}, {B, N, S, X}, {X, B, S, X}};
+unsigned char TileGrid28n[GRD_H][GRD_W] = {
+    {X, X, X, X}, {X, B, X, X}, {B, N, B, X}, {S, S, B, X}};
 
 ///////////////////////////////////////////
 
@@ -159,46 +188,46 @@ unsigned char TileGrid28n[GRD_H][GRD_W] = { {X,X,X,X},{X,B,X,X},{B,N,B,X},{S,S,B
 // offset(s) are used on the input put and the tile(s) updated.
 //
 struct UpdateInfo {
-	unsigned char (*pattern)[GRD_W];
-	int mask;
-	int value;
-	// Offsets from the top left corner point being used to
-	// create the 4x4 grid of tile1 ad tile2
-	int xoff1, yoff1;
-	int xoff2, yoff2;
-	// The 1 or 2 tiles to update
-	TileName t1;
-	TileName t2;
+  unsigned char (*pattern)[GRD_W];
+  int mask;
+  int value;
+  // Offsets from the top left corner point being used to
+  // create the 4x4 grid of tile1 ad tile2
+  int xoff1, yoff1;
+  int xoff2, yoff2;
+  // The 1 or 2 tiles to update
+  TileName t1;
+  TileName t2;
 };
 
 UpdateInfo updates[] = {
-	// Two tiles (30 and 60)
-    { TileGrid30a,  0, 0, 0,0, 0,0, H30a1, H30a2},
-    { TileGrid60b,  0, 0, 0,0, 0,0, V60b1, V60b2},
-    { TileGrid30c,  0, 0, 0,0, 0,0, H30c1, H30c2},
-    { TileGrid60d,  0, 0, 0,0, 0,0, V60d1, V60d2},
+    // Two tiles (30 and 60)
+    {TileGrid30a, 0, 0, 0, 0, 0, 0, H30a1, H30a2},
+    {TileGrid60b, 0, 0, 0, 0, 0, 0, V60b1, V60b2},
+    {TileGrid30c, 0, 0, 0, 0, 0, 0, H30c1, H30c2},
+    {TileGrid60d, 0, 0, 0, 0, 0, 0, V60d1, V60d2},
 
-    { TileGrid30b,  0, 0, 0,0, 0,0, H30b1, H30b2},
-    { TileGrid60c,  0, 0, 0,0, 0,0, V60c1, V60c2},
-    { TileGrid30d,  0, 0, 0,0, 0,0, H30d1, H30d2},
-    { TileGrid60a,  0, 0, 0,0, 0,0, V60a1, V60a2},
-	// single tiles
-    { TileGrid45b,  0, 0, 0,0, 0,0, T45b, IGNORE},
-    { TileGrid45c,  0, 0, 0,0, 0,0, T45c, IGNORE},
-    { TileGrid45d,  0, 0, 0,0, 0,0, T45d, IGNORE},
-    { TileGrid45a,  0, 0, 0,0, 0,0, T45a, IGNORE},
-	// end caps
-    { TileGridNDw,  0, 0, 0,0, 0,0, FLOOR, IGNORE},
-    { TileGridNDe,  0, 0, 0,0, 0,0, FLOOR, IGNORE},
-    { TileGridNDn,  0, 0, 0,0, 0,0, FLOOR, IGNORE},
-    { TileGridNDs,  0, 0, 0,0, 0,0, FLOOR, IGNORE},
-	// The single isolated tile
-    { TileGridNGL,  0, 0, 0,0, 0,0, SINGLE, IGNORE},
-	// 2 vert/horz tiles
-    { TileGrid2Dn,  0, 0, 0,0, 0,0, END_N, IGNORE},
-    { TileGrid2Ds,  0, 0, 0,0, 0,0, END_S, IGNORE},
-    { TileGrid2De,  0, 0, 0,0, 0,0, END_E, IGNORE},
-    { TileGrid2Dw,  0, 0, 0,0, 0,0, END_W, IGNORE},
+    {TileGrid30b, 0, 0, 0, 0, 0, 0, H30b1, H30b2},
+    {TileGrid60c, 0, 0, 0, 0, 0, 0, V60c1, V60c2},
+    {TileGrid30d, 0, 0, 0, 0, 0, 0, H30d1, H30d2},
+    {TileGrid60a, 0, 0, 0, 0, 0, 0, V60a1, V60a2},
+    // single tiles
+    {TileGrid45b, 0, 0, 0, 0, 0, 0, T45b, IGNORE},
+    {TileGrid45c, 0, 0, 0, 0, 0, 0, T45c, IGNORE},
+    {TileGrid45d, 0, 0, 0, 0, 0, 0, T45d, IGNORE},
+    {TileGrid45a, 0, 0, 0, 0, 0, 0, T45a, IGNORE},
+    // end caps
+    {TileGridNDw, 0, 0, 0, 0, 0, 0, FLOOR, IGNORE},
+    {TileGridNDe, 0, 0, 0, 0, 0, 0, FLOOR, IGNORE},
+    {TileGridNDn, 0, 0, 0, 0, 0, 0, FLOOR, IGNORE},
+    {TileGridNDs, 0, 0, 0, 0, 0, 0, FLOOR, IGNORE},
+    // The single isolated tile
+    {TileGridNGL, 0, 0, 0, 0, 0, 0, SINGLE, IGNORE},
+    // 2 vert/horz tiles
+    {TileGrid2Dn, 0, 0, 0, 0, 0, 0, END_N, IGNORE},
+    {TileGrid2Ds, 0, 0, 0, 0, 0, 0, END_S, IGNORE},
+    {TileGrid2De, 0, 0, 0, 0, 0, 0, END_E, IGNORE},
+    {TileGrid2Dw, 0, 0, 0, 0, 0, 0, END_W, IGNORE},
 #if 0
     // Bit sticking off end
     { TileGrid21n,  0, 0, 0,0, 0,0, FLOOR, IGNORE},
@@ -216,115 +245,130 @@ UpdateInfo updates[] = {
 //
 // Use the patterns to calc and modify the updates with mask,value and offsets
 //
-void createUpdateInfos()
-{
-    LOG_INFO("====================== SMOOTH CREATE UPDATES");
-	for (auto& u : updates) {
-        const unsigned char (*grid)[GRD_W] = u.pattern;
-        int l_mask = 0;
-        int l_value = 0;
-        int l_xOff1 = -1;
-        int l_yOff1 = -1;
-        int l_xOff2 = -1;
-        int l_yOff2 = -1;
-        int s=(GRD_H*GRD_W)-1;
-        for (int r=0; r < GRD_H; ++r)
-        {
-            for (int c=0; c < GRD_W; ++c)
-            {
-                switch (grid[r][c])
-                {
-                case X: l_mask |= 0<<s; l_value |= 0<<s; break;
-                case B: l_mask |= 1<<s; l_value |= 0<<s; break;
-                case S: l_mask |= 1<<s; l_value |= 1<<s; break;
-                case N: l_mask |= 1<<s; l_value |= 1<<s; l_xOff1=c; l_yOff1=r; break;
-                case M: l_mask |= 1<<s; l_value |= 1<<s; l_xOff2=c; l_yOff2=r; break;
-                default: break;
-                }
-                --s;
-            }
+void createUpdateInfos() {
+  LOG_INFO("====================== SMOOTH CREATE UPDATES");
+  for (auto &u : updates) {
+    const unsigned char (*grid)[GRD_W] = u.pattern;
+    int l_mask = 0;
+    int l_value = 0;
+    int l_xOff1 = -1;
+    int l_yOff1 = -1;
+    int l_xOff2 = -1;
+    int l_yOff2 = -1;
+    int s = (GRD_H * GRD_W) - 1;
+    for (int r = 0; r < GRD_H; ++r) {
+      for (int c = 0; c < GRD_W; ++c) {
+        switch (grid[r][c]) {
+        case X:
+          l_mask |= 0 << s;
+          l_value |= 0 << s;
+          break;
+        case B:
+          l_mask |= 1 << s;
+          l_value |= 0 << s;
+          break;
+        case S:
+          l_mask |= 1 << s;
+          l_value |= 1 << s;
+          break;
+        case N:
+          l_mask |= 1 << s;
+          l_value |= 1 << s;
+          l_xOff1 = c;
+          l_yOff1 = r;
+          break;
+        case M:
+          l_mask |= 1 << s;
+          l_value |= 1 << s;
+          l_xOff2 = c;
+          l_yOff2 = r;
+          break;
+        default:
+          break;
         }
-        if (l_xOff1 == -1)
-        {
-            LOG_ABORT("No tile position. " << u.t1 << "," << u.t2);
-        }
-        u.mask = l_mask;
-        u.value = l_value;
-        u.xoff1 = l_xOff1;
-        u.yoff1 = l_yOff1;
-        // Make P2 = P1 so don't need to check if 1 or 2 tiles being updated
-        u.xoff2 = (l_xOff2 == -1) ? l_xOff1 : l_xOff2;
-        u.yoff2 = (l_yOff2 == -1) ? l_yOff1 : l_yOff2;
-        LOG_DEBUG("UPDATE: msk:" << std::hex << u.mask << " val:" << u.value << std::dec
-            << " of1: " << u.xoff1 << "," << u.yoff1
-            << " of2: " << u.xoff2 << "," << u.yoff2);
+        --s;
+      }
     }
+    if (l_xOff1 == -1) {
+      LOG_ABORT("No tile position. " << u.t1 << "," << u.t2);
+    }
+    u.mask = l_mask;
+    u.value = l_value;
+    u.xoff1 = l_xOff1;
+    u.yoff1 = l_yOff1;
+    // Make P2 = P1 so don't need to check if 1 or 2 tiles being updated
+    u.xoff2 = (l_xOff2 == -1) ? l_xOff1 : l_xOff2;
+    u.yoff2 = (l_yOff2 == -1) ? l_yOff1 : l_yOff2;
+    LOG_DEBUG("UPDATE: msk:" << std::hex << u.mask << " val:" << u.value
+                             << std::dec << " of1: " << u.xoff1 << ","
+                             << u.yoff1 << " of2: " << u.xoff2 << ","
+                             << u.yoff2);
+  }
 }
 
-}
+} // namespace
 
 //////////////////////////////////////////////////
 
-CaveSmoother::CaveSmoother(TileMap& tm, const CaveInfo& i)
-	: info(i)
-	, tileMap(tm)
-{
-	createUpdateInfos();
+CaveSmoother::CaveSmoother(TileMap &tm, const CaveInfo &i)
+    : info(i), tileMap(tm) {
+  createUpdateInfos();
 }
 
-CaveSmoother::~CaveSmoother() {
-}
+CaveSmoother::~CaveSmoother() {}
 
 //
 // Copy the input, create a 4x4 grid value for each pos (bit set = wall)
 // and find any matching update(s). For each match set the TileMapLayer
 // cell(s) for the 1 or 2 tiles for each update.
 //
-void CaveSmoother::smoothEdges()
-{
-	//
-	// NOTE: So we can do a 4x4 with the top and left edge being the border
-	// we shift the maze 0,0 to 1,1. We also make it wider to allow the
-	// right and bottom edges to be a border
-	//
-    LOG_INFO("====================== SMOOTH EDGES");
-	std::vector<std::vector<int>> smoothedGrid(info.mCaveHeight+GRD_H+1, std::vector<int>(info.mCaveWidth+GRD_W+1, IGNORE));
-	std::vector<std::vector<int>> inGrid(info.mCaveHeight+GRD_H+1, std::vector<int>(info.mCaveWidth+GRD_W+1, SOLID));
+void CaveSmoother::smoothEdges() {
+  //
+  // NOTE: So we can do a 4x4 with the top and left edge being the border
+  // we shift the maze 0,0 to 1,1. We also make it wider to allow the
+  // right and bottom edges to be a border
+  //
+  LOG_INFO("====================== SMOOTH EDGES");
+  std::vector<std::vector<int>> smoothedGrid(
+      info.mCaveHeight + GRD_H + 1,
+      std::vector<int>(info.mCaveWidth + GRD_W + 1, IGNORE));
+  std::vector<std::vector<int>> inGrid(
+      info.mCaveHeight + GRD_H + 1,
+      std::vector<int>(info.mCaveWidth + GRD_W + 1, SOLID));
 
-	//
-	// Copy the current cave
-	// NOTE: Translate the cave 0,0 => 1,1 of grids
-	//
-	for (int y = 0; y < info.mCaveHeight; y++) {
-		for (int x = 0; x < info.mCaveWidth; x++) {
-			inGrid[y+1][x+1] = Cave::isWall(tileMap, x,y) ? SOLID : FLOOR;
-		}
-	}
-	//
-	// Smooth the grid
-	//
-    for (int y = 0; y < info.mCaveHeight-1; y++) {
-    	for (int x = 0; x < info.mCaveWidth-1; x++) {
+  //
+  // Copy the current cave
+  // NOTE: Translate the cave 0,0 => 1,1 of grids
+  //
+  for (int y = 0; y < info.mCaveHeight; y++) {
+    for (int x = 0; x < info.mCaveWidth; x++) {
+      inGrid[y + 1][x + 1] = Cave::isWall(tileMap, x, y) ? SOLID : FLOOR;
+    }
+  }
+  //
+  // Smooth the grid
+  //
+  for (int y = 0; y < info.mCaveHeight - 1; y++) {
+    for (int x = 0; x < info.mCaveWidth - 1; x++) {
 
-    		// Get the value of the 4x4 grid
-            LOG_DEBUG("==MASK value " << x << "," << y);
-    		int value=0;
-    		int shift=(GRD_H*GRD_W)-1;
-    		for (int r=0; r < GRD_H; ++r)
-    		{
-    			for (int c=0; c < GRD_W; ++c)
-    			{
-    				if (inGrid[y+r][x+c] == SOLID) {
-    					value |= (1<<shift);
-    				}
-    				--shift;
-    			}
-    		}
-            LOG_DEBUG("==FIND " << x << "," << y << " val:" << std::hex << value << std::dec);
+      // Get the value of the 4x4 grid
+      LOG_DEBUG("==MASK value " << x << "," << y);
+      int value = 0;
+      int shift = (GRD_H * GRD_W) - 1;
+      for (int r = 0; r < GRD_H; ++r) {
+        for (int c = 0; c < GRD_W; ++c) {
+          if (inGrid[y + r][x + c] == SOLID) {
+            value |= (1 << shift);
+          }
+          --shift;
+        }
+      }
+      LOG_DEBUG("==FIND " << x << "," << y << " val:" << std::hex << value
+                          << std::dec);
 
-    		// Find the matching update(s) for that value
-    		//
-			#if 0
+      // Find the matching update(s) for that value
+      //
+#if 0
             for (const auto& up : updates) {
                 if ( (value&up.mask) == up.value) {
 					Vector2i pos1{x+ up.xoff1, y+ up.yoff1};
@@ -348,52 +392,49 @@ void CaveSmoother::smoothEdges()
                 	}
                 }
             }
-			#else
-			int idx = 0;
-		    for (const auto& up : updates) {
-                LOG_DEBUG("  NEXT up:" << idx << " msk:" << std::hex << up.mask << " val:" << up.value
-                    << " inVal:" << value << " and:" << (value & up.mask) << std::dec);
-                if ( (value&up.mask) == up.value) {
-					Vector2i pos1{x+ up.xoff1, y+ up.yoff1};
-					Vector2i pos2{x+ up.xoff2, y+ up.yoff2};
+#else
+      int idx = 0;
+      for (const auto &up : updates) {
+        LOG_DEBUG("  NEXT up:" << idx << " msk:" << std::hex << up.mask
+                               << " val:" << up.value << " inVal:" << value
+                               << " and:" << (value & up.mask) << std::dec);
+        if ((value & up.mask) == up.value) {
+          Vector2i pos1{x + up.xoff1, y + up.yoff1};
+          Vector2i pos2{x + up.xoff2, y + up.yoff2};
 
-
-                    LOG_DEBUG("      FOUND1 up:" << idx
-                        << " p1:" << pos1.x << "," << pos1.y
-                        << " p2:" << pos2.x << "," << pos2.y);
-                	// Ensure not smoothed it already
-                	// - can check both pos since p2 == p1 if no 2nd tile
-                	if ((smoothedGrid[pos1.y][pos1.x] == IGNORE)
-                	 && (smoothedGrid[pos2.y][pos2.x] == IGNORE)) {
-                        LOG_DEBUG("         SMOOTH1 -> " << up.t1);
-                		// Smooth the first (N) tile
-                		// - Need to translate the grid pos back to cave pos
-						Cave::setCell(tileMap, pos1.x-1,pos1.y-1, up.t1);
-                		smoothedGrid[pos1.y][pos1.x] = SMOOTHED;
-                		// Check if there is a second (M) tile
-                		if (up.t2 != IGNORE) {
-                            LOG_DEBUG("      FOUND2 " << pos2.x << "," << pos2.y);
-                            LOG_DEBUG("         SMOOTH2 -> " << up.t2);
-                			// Smooth the second (M) tile
-                			// - Need to translate the grid pos back to cave pos
-							Cave::setCell(tileMap, pos2.x-1,pos2.y-1, up.t2);
-                			smoothedGrid[pos2.y][pos2.x] = SMOOTHED;
-                		}
-                		else {
-                            LOG_DEBUG("  IGNORE TILE2: " << pos2.x << "," << pos2.y);
-                		}
-                	}
-                	else {
-                        LOG_DEBUG("  IGNORE p1:" << smoothedGrid[pos1.y][pos1.x]
-                            << " p2:" << smoothedGrid[pos2.y][pos2.x]);
-                	}
-                }
-                ++idx;
-			}
-			#endif
-    	}
+          LOG_DEBUG("      FOUND1 up:" << idx << " p1:" << pos1.x << ","
+                                       << pos1.y << " p2:" << pos2.x << ","
+                                       << pos2.y);
+          // Ensure not smoothed it already
+          // - can check both pos since p2 == p1 if no 2nd tile
+          if ((smoothedGrid[pos1.y][pos1.x] == IGNORE) &&
+              (smoothedGrid[pos2.y][pos2.x] == IGNORE)) {
+            LOG_DEBUG("         SMOOTH1 -> " << up.t1);
+            // Smooth the first (N) tile
+            // - Need to translate the grid pos back to cave pos
+            Cave::setCell(tileMap, pos1.x - 1, pos1.y - 1, up.t1);
+            smoothedGrid[pos1.y][pos1.x] = SMOOTHED;
+            // Check if there is a second (M) tile
+            if (up.t2 != IGNORE) {
+              LOG_DEBUG("      FOUND2 " << pos2.x << "," << pos2.y);
+              LOG_DEBUG("         SMOOTH2 -> " << up.t2);
+              // Smooth the second (M) tile
+              // - Need to translate the grid pos back to cave pos
+              Cave::setCell(tileMap, pos2.x - 1, pos2.y - 1, up.t2);
+              smoothedGrid[pos2.y][pos2.x] = SMOOTHED;
+            } else {
+              LOG_DEBUG("  IGNORE TILE2: " << pos2.x << "," << pos2.y);
+            }
+          } else {
+            LOG_DEBUG("  IGNORE p1:" << smoothedGrid[pos1.y][pos1.x]
+                                     << " p2:" << smoothedGrid[pos2.y][pos2.x]);
+          }
+        }
+        ++idx;
+      }
+#endif
     }
+  }
 }
 
-}
-
+} // namespace Cave
