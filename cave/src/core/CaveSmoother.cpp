@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include "CaveInfo.h"
+#include "Cave.h"
 #include "TileTypes.h"
 
 #include "Debug.h"
@@ -262,33 +263,11 @@ void createUpdateInfos()
 
 }
 
-// Check if a coordinate is within the grid bounds
-bool CaveSmoother::isInBounds(int x, int y) {
-    return (y >= 0 && y < info.mCaveHeight) && (x >= 0 && x < info.mCaveWidth);
-}
-
-bool CaveSmoother::isWall(int cx, int cy) {
-	if (isInBounds(cx, cy)) {
-		return ((*info.pTileMap)[cy][cx] == info.mWall);
-	}
-	return false;
-}
-
-bool CaveSmoother::isSolid(int cx, int cy, std::vector< std::vector<int> > grid) {
-	if (isInBounds(cx, cy)) {
-		return grid[cy][cx] == SOLID;
-	}
-	return false;
-}
-
-Vector2i CaveSmoother::getMapPos(int x, int y) {
-	return Vector2i{info.mBorderWidth+x*info.mCellWidth, info.mBorderHeight+y*info.mCellHeight};
-}
-
 //////////////////////////////////////////////////
 
-CaveSmoother::CaveSmoother(const Cave::CaveInfo& i) :
-	info(i)
+CaveSmoother::CaveSmoother(TileMap& tm, const CaveInfo& i)
+	: info(i)
+	, tileMap(tm)
 {
 	createUpdateInfos();
 }
@@ -318,7 +297,7 @@ void CaveSmoother::smoothEdges()
 	//
 	for (int y = 0; y < info.mCaveHeight; y++) {
 		for (int x = 0; x < info.mCaveWidth; x++) {
-			inGrid[y+1][x+1] = isWall(x,y) ? SOLID : FLOOR;
+			inGrid[y+1][x+1] = Cave::isWall(tileMap, x,y) ? SOLID : FLOOR;
 		}
 	}
 	//
@@ -345,44 +324,75 @@ void CaveSmoother::smoothEdges()
 
     		// Find the matching update(s) for that value
     		//
-		int idx = 0;
+			#if 0
             for (const auto& up : updates) {
                 if ( (value&up.mask) == up.value) {
-			Vector2i pos1{x+ up.xoff1, y+ up.yoff1};
-			Vector2i pos2{x+ up.xoff2, y+ up.yoff2};
+					Vector2i pos1{x+ up.xoff1, y+ up.yoff1};
+					Vector2i pos2{x+ up.xoff2, y+ up.yoff2};
                 	// Ensure not smoothed it already
                 	// - can check both pos since p2 == p1 if no 2nd tile
                 	if ((smoothedGrid[pos1.y][pos1.x] == IGNORE)
                 	 && (smoothedGrid[pos2.y][pos2.x] == IGNORE)) {
                 		// Smooth the first (N) tile
                 		// - Need to translate the grid pos back to cave pos
-				setCell(pos1.x-1,pos1.y-1, Vector2i{up.t1, 0});
+						LOG_INFO("SMOOTH " << x << "," << y << " " << up.t1 << "," << up.t2);
+						Cave::setCell(tileMap, pos1.x-1,pos1.y-1, up.t1);
                 		smoothedGrid[pos1.y][pos1.x] = SMOOTHED;
                 		// Check if there is a second (M) tile
                 		if (up.t2 != IGNORE) {
                 			// Smooth the second (M) tile
                 			// - Need to translate the grid pos back to cave pos
-					setCell(pos2.x-1,pos2.y-1, Vector2i{up.t2, 0});
+							Cave::setCell(tileMap, pos2.x-1,pos2.y-1, up.t2);
                 			smoothedGrid[pos2.y][pos2.x] = SMOOTHED;
                 		}
                 	}
                 }
-                ++idx;
             }
+			#else
+			int idx = 0;
+		    for (const auto& up : updates) {
+                LOG_DEBUG("  NEXT up:" << idx << " msk:" << std::hex << up.mask << " val:" << up.value
+                    << " inVal:" << value << " and:" << (value & up.mask) << std::dec);
+                if ( (value&up.mask) == up.value) {
+					Vector2i pos1{x+ up.xoff1, y+ up.yoff1};
+					Vector2i pos2{x+ up.xoff2, y+ up.yoff2};
+
+
+                    LOG_DEBUG("      FOUND1 up:" << idx
+                        << " p1:" << pos1.x << "," << pos1.y
+                        << " p2:" << pos2.x << "," << pos2.y);
+                	// Ensure not smoothed it already
+                	// - can check both pos since p2 == p1 if no 2nd tile
+                	if ((smoothedGrid[pos1.y][pos1.x] == IGNORE)
+                	 && (smoothedGrid[pos2.y][pos2.x] == IGNORE)) {
+                        LOG_DEBUG("         SMOOTH1 -> " << up.t1);
+                		// Smooth the first (N) tile
+                		// - Need to translate the grid pos back to cave pos
+						Cave::setCell(tileMap, pos1.x-1,pos1.y-1, up.t1);
+                		smoothedGrid[pos1.y][pos1.x] = SMOOTHED;
+                		// Check if there is a second (M) tile
+                		if (up.t2 != IGNORE) {
+                            LOG_DEBUG("      FOUND2 " << pos2.x << "," << pos2.y);
+                            LOG_DEBUG("         SMOOTH2 -> " << up.t2);
+                			// Smooth the second (M) tile
+                			// - Need to translate the grid pos back to cave pos
+							Cave::setCell(tileMap, pos2.x-1,pos2.y-1, up.t2);
+                			smoothedGrid[pos2.y][pos2.x] = SMOOTHED;
+                		}
+                		else {
+                            LOG_DEBUG("  IGNORE TILE2: " << pos2.x << "," << pos2.y);
+                		}
+                	}
+                	else {
+                        LOG_DEBUG("  IGNORE p1:" << smoothedGrid[pos1.y][pos1.x]
+                            << " p2:" << smoothedGrid[pos2.y][pos2.x]);
+                	}
+                }
+                ++idx;
+			}
+			#endif
     	}
     }
-}
-
-///////////////////////////////////////////////////
-
-//
-// Set the tile using the mCellWith X mCellHeight grid of 8x8 tiles
-// e.g. the 64x64 45 degree tile is drawn as 64 8x8 tiles
-//
-void CaveSmoother::setCell(int cx, int cy, Vector2i tile) {
-	if (isInBounds(cx, cy)) {
-		(*info.pTileMap)[cy][cx] = tile.x;
-	}
 }
 
 }

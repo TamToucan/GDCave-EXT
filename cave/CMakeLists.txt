@@ -47,9 +47,13 @@ target_link_libraries(${GDCAVE_LIB_NAME}
 add_custom_command(
     TARGET ${GDCAVE_LIB_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE:${CAVE_LIB_NAME}>
+        "D:/git/the-lott/addons/gdcave/bin"
+    COMMAND ${CMAKE_COMMAND} -E copy
         $<TARGET_FILE:${GDCAVE_LIB_NAME}>
         "D:/git/the-lott/addons/gdcave/bin")
 
 # Test executable for the core cave library
 add_executable(cave_test test/main.cpp)
+target_include_directories(cave_test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_link_libraries(cave_test PRIVATE ${CAVE_LIB_NAME})

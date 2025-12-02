@@ -11,7 +11,13 @@
             "program": "${workspaceRoot}/build/cave/cave_test.exe",
             "args": [],
             "cwd": "${workspaceRoot}",
-            "preLaunchTask": "Build Cave Test (Debug)"
+            "preLaunchTask": "Build Cave Test (Debug)",
+            "sourceMap": {
+                "/d/git/Cave": "${workspaceRoot}"
+            },
+            "initCommands": [
+                "settings set target.process.stop-on-sharedlibrary-events false"
+            ]
         }
     ]
 }

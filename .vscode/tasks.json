@@ -4,7 +4,16 @@
         {
             "label": "Build Cave Test (Debug)",
             "type": "shell",
-            "command": "cmake --preset=customer -S . -B build && cmake --build build",
+            "command": "cmake --preset=debug -S . -B build && cmake --build build --target cave_test",
+            "options": {
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": [
+                        "/d",
+                        "/c"
+                    ]
+                }
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -14,7 +23,28 @@
                 "clear": true,
                 "panel": "shared"
             },
-            "problemMatcher": []
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Build Cave Test (Release)",
+            "type": "shell",
+            "command": "cmake --preset=release -S . -B build && cmake --build build",
+            "options": {
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": [
+                        "/d",
+                        "/c"
+                    ]
+                }
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "clear": true,
+                "panel": "shared"
+            },
+            "problemMatcher": "$gcc"
         }
     ]
 }
