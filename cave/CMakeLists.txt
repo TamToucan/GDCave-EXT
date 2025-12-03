@@ -1,4 +1,4 @@
-project(GDCave)
+project(Cave-Lib)
 
 # Core cave library
 set(CAVE_LIB_NAME cave)
